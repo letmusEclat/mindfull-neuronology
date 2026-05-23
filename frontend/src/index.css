@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body, #root { height: 100%; margin: 0; padding: 0; background-color: #fff8f2; font-family: 'Poppins', 'Inter', sans-serif; color: #211b0f; }
+  #root { display: flex; flex-direction: column; max-width: 430px; margin: 0 auto; min-height: 100%; position: relative; box-shadow: 0 0 40px rgba(0,0,0,0.08); }
+}
+
+@layer utilities {
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+}
