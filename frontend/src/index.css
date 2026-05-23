@@ -1,10 +1,12 @@
+@import './styles/colors.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body, #root { height: 100%; margin: 0; padding: 0; background-color: #fff8f2; font-family: 'Poppins', 'Inter', sans-serif; color: #211b0f; }
+  html, body, #root { height: 100%; margin: 0; padding: 0; background-color: var(--color-surface); font-family: 'Poppins', 'Inter', sans-serif; color: var(--color-on-surface); }
   #root { display: flex; flex-direction: column; max-width: 430px; margin: 0 auto; min-height: 100%; position: relative; box-shadow: 0 0 40px rgba(0,0,0,0.08); }
 }
 

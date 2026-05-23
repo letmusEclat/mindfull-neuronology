@@ -7,32 +7,32 @@
 export default function NeuronAvatar({ variant = 'breathe', size = 120, animated = true }) {
   const configs = {
     gym: {
-      bodyColor: '#4a90d9',
-      glowColor: '#7bc8ff',
-      borderColor: '#facd3b',
-      bgColor: '#e8f4fd',
-      eyeColor: '#1a3a6e',
+      bodyColor: 'var(--color-avatar-gym-body)',
+      glowColor: 'var(--color-avatar-gym-glow)',
+      borderColor: 'var(--color-secondary-container)',
+      bgColor: 'var(--color-avatar-gym-bg)',
+      eyeColor: 'var(--color-avatar-gym-eye)',
     },
     breathe: {
-      bodyColor: '#e8a0b0',
-      glowColor: '#f5c6d0',
-      borderColor: '#facd3b',
-      bgColor: '#1a1040',
-      eyeColor: '#5c2030',
+      bodyColor: 'var(--color-avatar-breathe-body)',
+      glowColor: 'var(--color-avatar-breathe-glow)',
+      borderColor: 'var(--color-secondary-container)',
+      bgColor: 'var(--color-avatar-breathe-bg)',
+      eyeColor: 'var(--color-avatar-breathe-eye)',
     },
     habits: {
-      bodyColor: '#e8a0b0',
-      glowColor: '#f5c6d0',
-      borderColor: '#feb072',
-      bgColor: '#1a1040',
-      eyeColor: '#5c2030',
+      bodyColor: 'var(--color-avatar-habits-body)',
+      glowColor: 'var(--color-avatar-habits-glow)',
+      borderColor: 'var(--color-tertiary-container)',
+      bgColor: 'var(--color-avatar-habits-bg)',
+      eyeColor: 'var(--color-avatar-habits-eye)',
     },
     profile: {
-      bodyColor: '#e8a0b0',
-      glowColor: '#f5c6d0',
-      borderColor: '#facd3b',
-      bgColor: '#0d0820',
-      eyeColor: '#5c2030',
+      bodyColor: 'var(--color-avatar-profile-body)',
+      glowColor: 'var(--color-avatar-profile-glow)',
+      borderColor: 'var(--color-secondary-container)',
+      bgColor: 'var(--color-avatar-profile-bg)',
+      eyeColor: 'var(--color-avatar-profile-eye)',
     },
   }
 
@@ -47,7 +47,7 @@ export default function NeuronAvatar({ variant = 'breathe', size = 120, animated
         height: size,
         background: c.bgColor,
         border: `3px solid ${c.borderColor}`,
-        boxShadow: `0 0 0 4px ${c.borderColor}33, 0 4px 20px ${c.glowColor}55`,
+        boxShadow: `0 0 0 4px color-mix(in srgb, ${c.borderColor} 20%, transparent), 0 4px 20px color-mix(in srgb, ${c.glowColor} 35%, transparent)`,
       }}
     >
       <svg

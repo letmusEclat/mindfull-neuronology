@@ -1,49 +1,26 @@
 import { NavLink } from 'react-router-dom'
+import { FiActivity, FiCheckCircle, FiUser, FiWind } from 'react-icons/fi'
 
 const tabs = [
   {
     to: '/gym',
     label: 'Gimnasio',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M9.5 2a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Z" />
-        <path d="M14.5 17a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Z" />
-        <path d="M2 12h6m8 0h6" />
-        <path d="M6 12V8m12 4v4" />
-        <path d="M6 8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8Z" />
-      </svg>
-    ),
+    icon: FiActivity,
   },
   {
     to: '/breathe',
     label: 'Respirar',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 12s4-8 9-8 9 8 9 8-4 8-9 8-9-8-9-8Z" />
-        <path d="M12 12c0-1.5 1.5-3 3-3s3 1.5 3 3-1.5 3-3 3" />
-        <path d="M9 12c0 1.5-1.5 3-3 3" />
-      </svg>
-    ),
+    icon: FiWind,
   },
   {
     to: '/habits',
     label: 'Hábitos',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10" />
-        <path d="m9 12 2 2 4-4" />
-      </svg>
-    ),
+    icon: FiCheckCircle,
   },
   {
     to: '/profile',
     label: 'Perfil',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="8" r="4" />
-        <path d="M6 20v-1a6 6 0 0 1 12 0v1" />
-      </svg>
-    ),
+    icon: FiUser,
   },
 ]
 
@@ -62,7 +39,7 @@ export default function BottomNav() {
             }`
           }
         >
-          {tab.icon}
+          <tab.icon className="w-6 h-6" />
           <span>{tab.label}</span>
         </NavLink>
       ))}

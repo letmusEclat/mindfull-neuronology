@@ -112,8 +112,8 @@ export default function Profile() {
 
           {/* Objective */}
           {currentProfile.objective && (
-            <div className="mt-3 px-4 py-2.5 rounded-xl text-center" style={{ background: '#fff0e6', border: '1px solid #feb072' }}>
-              <p className="text-xs font-semibold" style={{ color: '#78400a' }}>
+            <div className="mt-3 px-4 py-2.5 rounded-xl text-center" style={{ background: 'var(--color-objective-bg)', border: '1px solid var(--color-tertiary-container)' }}>
+              <p className="text-xs font-semibold" style={{ color: 'var(--color-on-tertiary-container)' }}>
                 Objetivo de enfoque: {currentProfile.objective}
               </p>
             </div>
@@ -247,7 +247,7 @@ export default function Profile() {
             className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-red-50 transition-colors"
           >
             <div className="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">
-              <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" stroke="#ba1a1a" strokeWidth="2">
+              <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" stroke="var(--color-error)" strokeWidth="2">
                 <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>

@@ -1,0 +1,70 @@
+:root {
+  --color-surface: #fff8f2;
+  --color-surface-dim: #e5d8c6;
+  --color-surface-container: #f9ecd9;
+  --color-surface-container-low: #fff2df;
+  --color-surface-container-high: #f3e6d4;
+  --color-surface-container-highest: #eee1ce;
+  --color-surface-variant: #eee1ce;
+  --color-on-surface: #211b0f;
+  --color-on-surface-variant: #4f4636;
+  --color-outline: #817664;
+  --color-outline-variant: #d2c5b0;
+
+  --color-primary: #4a6800;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #b2e251;
+  --color-on-primary-container: #374e00;
+
+  --color-secondary: #745b00;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #facd3b;
+  --color-on-secondary-container: #6e5700;
+
+  --color-tertiary: #8b501a;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #feb072;
+  --color-on-tertiary-container: #78400a;
+
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+
+  --color-habits-nutrition: #facd3b;
+  --color-habits-nutrition-bg: #fffbe6;
+  --color-habits-exercise: #feb072;
+  --color-habits-exercise-bg: #fff3e6;
+  --color-habits-growth: #b2e251;
+  --color-habits-growth-bg: #f2fce6;
+
+  --color-brain-cat-tech-bg: #d6f0a0;
+  --color-brain-cat-math-bg: #fff0b0;
+  --color-brain-cat-science-bg: #c8e878;
+  --color-brain-cat-geo-bg: #ffd8b0;
+  --color-brain-cat-history-bg: #f0c898;
+  --color-brain-cat-history-fg: #5c3000;
+
+  --color-avatar-gym-body: #4a90d9;
+  --color-avatar-gym-glow: #7bc8ff;
+  --color-avatar-gym-bg: #e8f4fd;
+  --color-avatar-gym-eye: #1a3a6e;
+  --color-avatar-breathe-body: #e8a0b0;
+  --color-avatar-breathe-glow: #f5c6d0;
+  --color-avatar-breathe-bg: #1a1040;
+  --color-avatar-breathe-eye: #5c2030;
+  --color-avatar-habits-body: #e8a0b0;
+  --color-avatar-habits-glow: #f5c6d0;
+  --color-avatar-habits-bg: #1a1040;
+  --color-avatar-habits-eye: #5c2030;
+  --color-avatar-profile-body: #e8a0b0;
+  --color-avatar-profile-glow: #f5c6d0;
+  --color-avatar-profile-bg: #0d0820;
+  --color-avatar-profile-eye: #5c2030;
+
+  --color-heatmap-0: #fce8d8;
+  --color-heatmap-1: #e8b89a;
+  --color-heatmap-2: #c88860;
+  --color-heatmap-3: #a06030;
+  --color-heatmap-4: #7a3c10;
+
+  --color-objective-bg: #fff0e6;
+}

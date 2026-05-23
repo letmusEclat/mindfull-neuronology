@@ -1,41 +1,105 @@
 import { useState, useEffect, useCallback } from 'react'
+import { FiActivity, FiBell, FiBookOpen, FiCoffee, FiStar } from 'react-icons/fi'
 import NeuronAvatar from '../components/NeuronAvatar'
-import SpeechBubble from '../components/SpeechBubble'
 import HeatmapGrid from '../components/HeatmapGrid'
 import client from '../api/client'
 
 const DEFAULT_HABITS = [
-  { id: -1, name: 'Nutrición Equilibrada', description: 'Come verduras verdes', category: 'nutrition', emoji: '🍽️', icon_color: '#facd3b', completed: false },
-  { id: -2, name: 'Movimiento Diario',     description: '30 min caminando',     category: 'exercise',  emoji: '🏃', icon_color: '#feb072', completed: false },
-  { id: -3, name: 'Lectura Consciente',    description: 'Lee 20 páginas',        category: 'growth',    emoji: '📖', icon_color: '#b2e251', completed: false },
-]
-
-const BUBBLE_MSGS = [
-  '¡La constancia es clave para crecer! Sigue nutriendo esas vías neuronales.',
-  'Pequeños hábitos, grandes ganancias cerebrales. ¡Cada marca cuenta!',
-  'Construye la rutina — tus neuronas te están apoyando.',
+  { id: -1, name: 'Nutrición Equilibrada', description: 'Come verduras verdes', category: 'nutrition', emoji: '🍽️', completed: false },
+  { id: -2, name: 'Movimiento Diario', description: '30 min caminando', category: 'exercise', emoji: '🏃', completed: false },
+  { id: -3, name: 'Lectura Consciente', description: 'Lee 20 páginas', category: 'growth', emoji: '📖', completed: false },
 ]
 
 const CATEGORY_LABELS = {
-  nutrition: { label: 'Nutrición', color: '#facd3b', bg: '#fffbe6' },
-  exercise:  { label: 'Ejercicio',  color: '#feb072', bg: '#fff3e6' },
-  growth:    { label: 'Crecimiento', color: '#b2e251', bg: '#f2fce6' },
+  nutrition: { label: 'Nutrición', color: 'var(--color-habits-nutrition)', bg: 'var(--color-habits-nutrition-bg)' },
+  exercise: { label: 'Ejercicio', color: 'var(--color-habits-exercise)', bg: 'var(--color-habits-exercise-bg)' },
+  growth: { label: 'Crecimiento', color: 'var(--color-habits-growth)', bg: 'var(--color-habits-growth-bg)' },
+}
+
+const CATEGORY_ICONS = {
+  nutrition: FiCoffee,
+  exercise: FiActivity,
+  growth: FiBookOpen,
+}
+
+const CATEGORY_EMOJIS = {
+  nutrition: '🍽️',
+  exercise: '🏃',
+  growth: '📖',
+}
+
+function getHabitKey(habit) {
+  if (habit?.habit_id != null) return `habit-${habit.habit_id}`
+  if (habit?.id != null) return `id-${habit.id}`
+  return `tmp-${habit?.name ?? 'habit'}`
+}
+
+function getPersistedHabitId(habit) {
+  const candidate = habit?.habit_id ?? habit?.id
+  if (typeof candidate === 'number' && candidate > 0) return candidate
+  return null
+}
+
+function normalizeHabit(habit) {
+  const id = habit?.habit_id ?? habit?.id ?? null
+  return {
+    ...habit,
+    id: habit?.id ?? id,
+    habit_id: habit?.habit_id ?? id,
+    completed: Boolean(habit?.completed),
+  }
+}
+
+function countCompletedHabits(items) {
+  return items.filter((h) => h.completed).length
+}
+
+function getLegendTooltipByLevel(level) {
+  if (level <= 0) return '0-2 hábitos cumplidos'
+  if (level === 1) return '3-5 hábitos cumplidos'
+  if (level === 2) return '6-8 hábitos cumplidos'
+  if (level === 3) return '9-11 hábitos cumplidos'
+  return '12+ hábitos cumplidos'
 }
 
 export default function GoodHabits() {
   const [habits, setHabits] = useState(DEFAULT_HABITS)
   const [heatmap, setHeatmap] = useState([])
   const [loading, setLoading] = useState(false)
-  const [bubbleIdx] = useState(Math.floor(Math.random() * BUBBLE_MSGS.length))
   const [showAddForm, setShowAddForm] = useState(false)
   const [newHabit, setNewHabit] = useState({ name: '', description: '', category: 'nutrition' })
   const [saving, setSaving] = useState(false)
+
+  const upsertTodayHeatmap = useCallback((completedCount, totalHabits) => {
+    const today = new Date().toISOString().slice(0, 10)
+    const safeTotal = Math.max(1, Number(totalHabits) || 1)
+    const safeCount = Math.max(0, Number(completedCount) || 0)
+
+    setHeatmap((prev) => {
+      const next = [...prev]
+      const idx = next.findIndex((d) => d.date === today)
+      const payload = { date: today, count: safeCount, total: safeTotal }
+      if (idx >= 0) next[idx] = { ...next[idx], ...payload }
+      else next.push(payload)
+      return next
+    })
+  }, [])
 
   const loadTodayHabits = useCallback(async () => {
     setLoading(true)
     try {
       const { data } = await client.get('/habits/today/')
-      if (data.length > 0) setHabits(data)
+      if (data.length > 0) {
+        const incoming = data.map(normalizeHabit)
+        setHabits((prev) => {
+          const prevCompleted = new Map(prev.map((h) => [getHabitKey(h), Boolean(h.completed)]))
+          return incoming.map((h) => {
+            const key = getHabitKey(h)
+            const wasCompleted = prevCompleted.get(key) ?? false
+            return { ...h, completed: h.completed || wasCompleted }
+          })
+        })
+      }
     } catch {
       /* show defaults */
     } finally {
@@ -48,12 +112,9 @@ export default function GoodHabits() {
       const { data } = await client.get('/habits/heatmap/')
       setHeatmap(data)
     } catch {
-      // Generate mock heatmap for demo
-      const mock = []
-      for (let i = 0; i < 56; i++) {
-        mock.push({ date: '', count: Math.floor(Math.random() * 4), total: 3 })
-      }
-      setHeatmap(mock)
+      // Fallback: show only today's cell with zero progress.
+      const today = new Date().toISOString().slice(0, 10)
+      setHeatmap([{ date: today, count: 0, total: 1 }])
     }
   }, [])
 
@@ -62,16 +123,24 @@ export default function GoodHabits() {
     loadHeatmap()
   }, [loadTodayHabits, loadHeatmap])
 
+  useEffect(() => {
+    upsertTodayHeatmap(countCompletedHabits(habits), habits.length)
+  }, [habits, upsertTodayHeatmap])
+
   const toggleHabit = async (habit) => {
     const newCompleted = !habit.completed
-    setHabits((prev) => prev.map((h) => h.habit_id === habit.habit_id || h.id === habit.id ? { ...h, completed: newCompleted } : h))
-    if (habit.habit_id > 0 || habit.id > 0) {
+    const targetKey = getHabitKey(habit)
+
+    setHabits((prev) => {
+      return prev.map((h) => (getHabitKey(h) === targetKey ? { ...h, completed: newCompleted } : h))
+    })
+
+    const persistedHabitId = getPersistedHabitId(habit)
+    if (persistedHabitId) {
       try {
-        await client.post('/habits/today/', { habit_id: habit.habit_id ?? habit.id, completed: newCompleted })
-        // Sync pixel to Pixela if a habit gets completed
-        if (newCompleted) {
-          client.post('/pixela/pixel/', { quantity: '1' }).catch(() => {})
-        }
+        await client.post('/habits/today/', { habit_id: persistedHabitId, completed: newCompleted })
+        // Keep Pixela day pixel in sync with current completed-habits count.
+        client.post('/pixela/pixel/', { quantity: String(nextCompletedCount) }).catch(() => {})
       } catch { /* offline */ }
     }
   }
@@ -80,14 +149,26 @@ export default function GoodHabits() {
     if (!newHabit.name.trim()) return
     setSaving(true)
     try {
-      const { data } = await client.post('/habits/', { ...newHabit, emoji: '✨' })
-      setHabits((prev) => [...prev, { ...data, completed: false }])
+      const { data } = await client.post('/habits/', {
+        ...newHabit,
+        emoji: CATEGORY_EMOJIS[newHabit.category] ?? '✨',
+      })
+      setHabits((prev) => {
+        return [...prev, { ...normalizeHabit(data), completed: false }]
+      })
       setNewHabit({ name: '', description: '', category: 'nutrition' })
       setShowAddForm(false)
     } catch {
       // add locally
-      const local = { ...newHabit, id: Date.now(), emoji: '✨', completed: false }
-      setHabits((prev) => [...prev, local])
+      const local = {
+        ...newHabit,
+        id: Date.now(),
+        emoji: CATEGORY_EMOJIS[newHabit.category] ?? '✨',
+        completed: false,
+      }
+      setHabits((prev) => {
+        return [...prev, normalizeHabit(local)]
+      })
       setShowAddForm(false)
     } finally {
       setSaving(false)
@@ -96,6 +177,13 @@ export default function GoodHabits() {
 
   const completedCount = habits.filter((h) => h.completed).length
   const goalPercent = habits.length > 0 ? Math.round((completedCount / habits.length) * 100) : 0
+  const heatmapLegendColors = [
+    'var(--color-heatmap-0)',
+    'var(--color-heatmap-1)',
+    'var(--color-heatmap-2)',
+    'var(--color-heatmap-3)',
+    'var(--color-heatmap-4)',
+  ]
 
   return (
     <div className="flex flex-col min-h-screen bg-surface pb-20">
@@ -106,9 +194,7 @@ export default function GoodHabits() {
           <h1 className="text-base font-bold text-secondary">Hola, Explorador Neuronal</h1>
         </div>
         <button className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors text-on-surface-variant">
-          <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" stroke="currentColor" strokeWidth="2">
-            <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <FiBell className="w-5 h-5" />
         </button>
       </header>
 
@@ -128,8 +214,14 @@ export default function GoodHabits() {
             <h2 className="font-bold text-on-surface text-sm">Jardín Neural</h2>
             <div className="flex items-center gap-1 text-xs text-on-surface-variant">
               <span>Menos</span>
-              {['#fce8d8', '#e8b89a', '#c88860', '#a06030', '#7a3c10'].map((c) => (
-                <div key={c} className="w-3 h-3 rounded-sm" style={{ background: c }} />
+              {heatmapLegendColors.map((c, idx) => (
+                <div
+                  key={c}
+                  className="w-3 h-3 rounded-sm"
+                  style={{ background: c }}
+                  title={getLegendTooltipByLevel(idx)}
+                  aria-label={getLegendTooltipByLevel(idx)}
+                />
               ))}
               <span>Más</span>
             </div>
@@ -149,10 +241,10 @@ export default function GoodHabits() {
           </div>
           <div className="relative w-12 h-12">
             <svg viewBox="0 0 36 36" className="w-12 h-12 -rotate-90">
-              <circle cx="18" cy="18" r="14" fill="none" stroke="#eee1ce" strokeWidth="4" />
+              <circle cx="18" cy="18" r="14" fill="none" stroke="var(--color-surface-container-highest)" strokeWidth="4" />
               <circle
                 cx="18" cy="18" r="14" fill="none"
-                stroke="#4a6800" strokeWidth="4"
+                stroke="var(--color-primary)" strokeWidth="4"
                 strokeLinecap="round"
                 strokeDasharray={`${goalPercent * 0.88} 88`}
               />
@@ -214,16 +306,17 @@ export default function GoodHabits() {
         <div className="flex flex-col gap-2 pb-2">
           {habits.map((habit) => {
             const cat = CATEGORY_LABELS[habit.category] || CATEGORY_LABELS.growth
+            const HabitIcon = CATEGORY_ICONS[habit.category] || FiStar
             return (
               <div
-                key={habit.id ?? habit.habit_id}
+                key={getHabitKey(habit)}
                 className="bg-white rounded-2xl px-4 py-3.5 flex items-center gap-3 shadow-sm border border-outline-variant"
               >
                 <div
                   className="w-10 h-10 rounded-full flex items-center justify-center text-xl flex-shrink-0"
                   style={{ background: cat.bg }}
                 >
-                  {habit.emoji}
+                  <HabitIcon className="w-5 h-5" style={{ color: cat.color }} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-on-surface text-sm truncate">{habit.name}</p>

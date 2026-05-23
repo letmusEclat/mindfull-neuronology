@@ -106,7 +106,7 @@ def habit_entries_today(request):
 
 @api_view(['GET'])
 def habit_heatmap(request):
-    """Return last 56 days of habit-completion counts for the heatmap."""
+    """Return days with completed habits in the last 56 days plus today."""
     today = date.today()
     start = today - timedelta(days=55)
     entries = HabitEntry.objects.filter(
@@ -125,7 +125,9 @@ def habit_heatmap(request):
     current = start
     while current <= today:
         iso = current.isoformat()
-        result.append({'date': iso, 'count': counts.get(iso, 0), 'total': total_habits})
+        day_count = counts.get(iso, 0)
+        if day_count > 0 or current == today:
+            result.append({'date': iso, 'count': day_count, 'total': total_habits})
         current += timedelta(days=1)
     return Response(result)
 
@@ -172,12 +174,30 @@ def pixela_post_pixel(request):
     quantity = str(request.data.get('quantity', '1'))
     graph_id = profile.pixela_graph_id or 'mindful-neuron'
 
-    url = f'https://pixe.la/v1/users/{profile.pixela_username}/graphs/{graph_id}'
+    pixels_url = f'https://pixe.la/v1/users/{profile.pixela_username}/graphs/{graph_id}/pixels'
+    pixel_url = f'{pixels_url}/{pixel_date}'
     headers = {'X-USER-TOKEN': profile.pixela_token}
     payload = {'date': pixel_date, 'quantity': quantity}
 
     try:
-        resp = requests.post(url, json=payload, headers=headers, timeout=10)
-        return Response(resp.json(), status=resp.status_code)
+        quantity_int = int(quantity)
+
+        # No completed habits for the day: remove pixel if it exists.
+        if quantity_int <= 0:
+            resp = requests.delete(pixel_url, headers=headers, timeout=10)
+            return Response(resp.json(), status=resp.status_code)
+
+        # First try to create pixel in /pixels endpoint.
+        create_resp = requests.post(pixels_url, json=payload, headers=headers, timeout=10)
+        create_json = create_resp.json()
+
+        # If the pixel already exists, update it with PUT /pixels/{date}.
+        if not create_json.get('isSuccess', False):
+            update_resp = requests.put(pixel_url, json={'quantity': quantity}, headers=headers, timeout=10)
+            return Response(update_resp.json(), status=update_resp.status_code)
+
+        return Response(create_json, status=create_resp.status_code)
+    except ValueError:
+        return Response({'error': 'Quantity must be a valid integer string.'}, status=400)
     except requests.RequestException as e:
         return Response({'error': str(e)}, status=502)
